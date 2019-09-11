@@ -22,10 +22,11 @@ namespace Remnant
             rForm = new Form1();
             Application.Run(rForm);
         }
-
         public static Form rForm;
         public static FileSystemWatcher saveWatcher;
         public static string currentSave = "";
+        public delegate void CampaignReroll(string saveText, List<RemnantEvent> events);
+        public static CampaignReroll OnReroll;
         static Dictionary<string, string> sublocations = new Dictionary<string, string>
         {
             {"RootCultist", "MarrowPass" },
@@ -66,7 +67,6 @@ namespace Remnant
             {"WolfShrine", "Martyr'sSanctuary" },
             {"UndyingKing", "Pussy'sPyramid" }
         };
-
         static Dictionary<string, string> mainLocations = new Dictionary<string, string>{
             {"City Overworld Zone1", "Fairview" },
             {"City Overworld Zone2", "Westcourt" },
@@ -94,14 +94,14 @@ namespace Remnant
 
             ParseSave(savePath);
         }
-
         private static void ParseSave(string filePath)
         {
             try
             {
-                rForm.Controls[1].InvokeEx(x => x.Text = "Loading...");
+                //rForm.Controls[1].InvokeEx(x => x.Text = "Loading...");
 
                 StringBuilder bob = new StringBuilder();
+                List<RemnantEvent> campaignEvents = new List<RemnantEvent>();
 
                 while (!WaitForFile(filePath))
                     Task.Delay(1000);
@@ -227,6 +227,7 @@ namespace Remnant
                                     zones[zone][eventType] += ", " + eventName;
                                     //Console.WriteLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
                                     bob.AppendLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
+                                    campaignEvents.Add(new RemnantEvent(zone, currentMainLocation, currentSublocation, eventType, eventName));
                                 }
                             }
                             else
@@ -234,16 +235,18 @@ namespace Remnant
                                 zones[zone][eventType] = eventName;
                                 //Console.WriteLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
                                 bob.AppendLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
+                                campaignEvents.Add(new RemnantEvent(zone, currentMainLocation, currentSublocation, eventType, eventName));
                             }
                         }
                     }
                 }
                 currentSave = bob.ToString();
-                rForm.Controls[1].InvokeEx(x => x.Text = currentSave);
+                OnReroll?.Invoke(currentSave, campaignEvents);
+                //rForm.Controls[1].InvokeEx(x => x.Text = currentSave);
             }
             catch (FileNotFoundException ex)
             {
-                rForm.Controls[1].InvokeEx(x => x.Text = ex.Message);
+                //rForm.Controls[1].InvokeEx(x => x.Text = ex.Message);
             }
         }
         public static void SaveCSV(string dirPath)
@@ -252,17 +255,17 @@ namespace Remnant
         }
         private static void OnChangedAsync(object source, FileSystemEventArgs e) =>
             ParseSave(e.FullPath);
-        public static void InvokeEx<T>(this T @this, Action<T> action) where T : ISynchronizeInvoke
-        {
-            if (@this.InvokeRequired)
-            {
-                @this.Invoke(action, new object[] { @this });
-            }
-            else
-            {
-                action(@this);
-            }
-        }
+        //public static void InvokeEx<T>(this T @this, Action<T> action) where T : ISynchronizeInvoke
+        //{
+        //    if (@this.InvokeRequired)
+        //    {
+        //        @this.Invoke(action, new object[] { @this });
+        //    }
+        //    else
+        //    {
+        //        action(@this);
+        //    }
+        //}
         static bool WaitForFile(string fullPath)
         {
             int numTries = 0;
@@ -304,6 +307,34 @@ namespace Remnant
             //Log.LogTrace("WaitForFile {0} returning true after {1} tries",
             //    fullPath, numTries);
             return true;
+        }
+
+    }
+    public class RemnantEvent
+    {
+        public string zone;
+        public string mainLocation;
+        public string subLocation;
+        public string eventType;
+        public string eventName;
+        public RemnantEvent(string zone, string mainLocation, string subLocation, string eventType, string eventName)
+        {
+            this.zone = zone;
+            this.mainLocation = mainLocation;
+            this.subLocation = subLocation;
+            this.eventType = eventType;
+            this.eventName = eventName;
+        }
+    }
+
+    public static class Extensions
+    {
+        public static void AddIf(this TreeNodeCollection collection, TreeNode node)
+        {
+            if (!collection.ContainsKey(node.Name))
+            {
+                collection.Add(node);
+            }
         }
     }
 }

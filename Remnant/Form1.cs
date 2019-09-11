@@ -16,15 +16,21 @@ namespace Remnant
         public Form1()
         {
             InitializeComponent();
+            Program.OnReroll += RefreshCampaign;
         }
 
         private void Button1_Click(object sender, EventArgs e)
         {
+            textBox1.Text = "Reading...";
             OpenFileDialog dialog = new OpenFileDialog();
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 textBox1.Text = dialog.FileName;
                 Program.WatchForChanges(dialog.FileName);
+            }
+            else
+            {
+                textBox1.Text = "No save file selected";
             }
         }
 
@@ -46,6 +52,31 @@ namespace Remnant
         private void TextBox1_TextChanged(object sender, EventArgs e)
         {
 
+        }
+        private void RefreshCampaign(string current, List<RemnantEvent> events)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    RefreshCampaign(current, events);
+                });
+                return;
+            }
+            // Text
+            textBox2.Text = current;
+            // Tree
+            if (treeView1.Nodes.Count > 0)
+                treeView1.Nodes.Clear();
+            foreach (var e in events)
+            {
+                treeView1.Nodes.AddIf(new TreeNode(e.zone) { Name = e.zone });
+                treeView1.Nodes[e.zone].Nodes.AddIf(new TreeNode(e.mainLocation) { Name = e.mainLocation });
+                treeView1.Nodes[e.zone].Nodes[e.mainLocation].Nodes.AddIf(new TreeNode(e.subLocation) { Name = e.subLocation });
+                treeView1.Nodes[e.zone].Nodes[e.mainLocation].Nodes[e.subLocation].Nodes.AddIf(new TreeNode(e.eventType) { Name = e.eventType });
+                treeView1.Nodes[e.zone].Nodes[e.mainLocation].Nodes[e.subLocation].Nodes[e.eventType].Nodes.AddIf(new TreeNode(e.eventName) { Name = e.eventName });
+            }
+            treeView1.ExpandAll();
         }
     }
 }
