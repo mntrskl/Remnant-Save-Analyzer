@@ -98,7 +98,7 @@ namespace Remnant
         {
             try
             {
-                rForm.Controls[0].InvokeEx(x => x.Text = "Loading...");
+                rForm.Controls[1].InvokeEx(x => x.Text = "Loading...");
 
                 StringBuilder bob = new StringBuilder();
 
@@ -240,11 +240,11 @@ namespace Remnant
                         }
                     }
                 }
-                rForm.Controls[0].InvokeEx(x => x.Text = bob.ToString());
+                rForm.Controls[1].InvokeEx(x => x.Text = bob.ToString());
             }
             catch (FileNotFoundException ex)
             {
-                rForm.Controls[0].InvokeEx(x => x.Text = ex.Message);
+                rForm.Controls[1].InvokeEx(x => x.Text = ex.Message);
             }
         }
         private static void OnChangedAsync(object source, FileSystemEventArgs e) =>
