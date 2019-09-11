@@ -20,14 +20,29 @@ namespace Remnant
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            OpenFileDialog browseDialog = new OpenFileDialog();
-            if (browseDialog.ShowDialog() == DialogResult.OK)
+            OpenFileDialog dialog = new OpenFileDialog();
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
-                textBox1.Text = browseDialog.FileName;
-                Program.WatchForChanges(browseDialog.FileName);
+                textBox1.Text = dialog.FileName;
+                Program.WatchForChanges(dialog.FileName);
             }
         }
 
+        private void Button2_Click(object sender, EventArgs e)
+        {
+            if (Program.currentSave == "") return;
+            SaveFileDialog dialog = new SaveFileDialog()
+            {
+                FileName = "remnant_export",
+                DefaultExt = ".csv",
+                InitialDirectory = Directory.GetCurrentDirectory()
+            };
+            DialogResult result = dialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                Program.SaveCSV(dialog.FileName);
+            }
+        }
         private void TextBox1_TextChanged(object sender, EventArgs e)
         {
 

@@ -25,6 +25,7 @@ namespace Remnant
 
         public static Form rForm;
         public static FileSystemWatcher saveWatcher;
+        public static string currentSave = "";
         static Dictionary<string, string> sublocations = new Dictionary<string, string>
         {
             {"RootCultist", "MarrowPass" },
@@ -224,28 +225,30 @@ namespace Remnant
                                 if (zones[zone][eventType].IndexOf(eventName) == -1)
                                 {
                                     zones[zone][eventType] += ", " + eventName;
-                                    //System.Text.RegularExpressions.Regex.Split(currentMainLocaion)
-                                    Console.WriteLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
+                                    //Console.WriteLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
                                     bob.AppendLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
-                                    //html = "<tr><td>" + zone + ": " + currentMainLocation.split(/ (?=[A - Z]) /).join(' ') + ": " + currentSublocation.split(/ (?=[A - Z]) /).join(' ') + "</td><td>" + eventType + "</td><td>" + eventName.split(/ (?=[A - Z]) /).join(' ') + "</td></tr>"
                                 }
                             }
                             else
                             {
                                 zones[zone][eventType] = eventName;
-                                Console.WriteLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
+                                //Console.WriteLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
                                 bob.AppendLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
-                                //html = "<tr><td>" + zone + ": " + currentMainLocation.split(/ (?=[A - Z]) /).join(' ') + ": " + currentSublocation.split(/ (?=[A - Z]) /).join(' ') + "</td><td>" + eventType + "</td><td>" + eventName.split(/ (?=[A - Z]) /).join(' ') + "</td></tr>"
                             }
                         }
                     }
                 }
-                rForm.Controls[1].InvokeEx(x => x.Text = bob.ToString());
+                currentSave = bob.ToString();
+                rForm.Controls[1].InvokeEx(x => x.Text = currentSave);
             }
             catch (FileNotFoundException ex)
             {
                 rForm.Controls[1].InvokeEx(x => x.Text = ex.Message);
             }
+        }
+        public static void SaveCSV(string dirPath)
+        {
+            File.WriteAllText(dirPath, currentSave);
         }
         private static void OnChangedAsync(object source, FileSystemEventArgs e) =>
             ParseSave(e.FullPath);
