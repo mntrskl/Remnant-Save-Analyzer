@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.ComponentModel;
 using System.Text;
+using System.Runtime.Caching;
 
 namespace Remnant
 {
@@ -266,9 +267,13 @@ namespace Remnant
             }
         }
 
+        private static MemoryCache _memCache;
+        private static CacheItemPolicy _cacheItemPolicy;
+        private const int CacheTimeMilliseconds = 1000;
         public static void StartWatching()
         {
-            Console.WriteLine("Test");
+            _memCache = MemoryCache.Default;
+
             if (saveWatcher != null)
             {
                 saveWatcher.Changed -= OnSaveChanged;
@@ -279,8 +284,12 @@ namespace Remnant
             saveWatcher = new FileSystemWatcher()
             {
                 Path = Path.GetDirectoryName(currentSaveFile),
-                Filter = Path.GetFileName(currentSaveFile)
+                Filter = Path.GetFileName(currentSaveFile),
+                NotifyFilter = NotifyFilters.LastWrite
             };
+
+            _cacheItemPolicy = new CacheItemPolicy() { RemovedCallback = OnRemovedFromCache };
+
             saveWatcher.Changed += OnSaveChanged;
             saveWatcher.EnableRaisingEvents = true;
         }
@@ -328,6 +337,19 @@ namespace Remnant
 
         public static void SaveCSV(string dirPath) => File.WriteAllText(dirPath, currentSaveCSV);
 
-        private static void OnSaveChanged(object source, FileSystemEventArgs e) => ParseSave();
+        private static void OnSaveChanged(object source, FileSystemEventArgs e) {
+            _cacheItemPolicy.AbsoluteExpiration =
+           DateTimeOffset.Now.AddMilliseconds(CacheTimeMilliseconds);
+
+            // Only add if it is not there already (swallow others)
+            _memCache.AddOrGetExisting(e.Name, e, _cacheItemPolicy);
+        }
+        private static void OnRemovedFromCache(CacheEntryRemovedArguments args)
+        {
+            if (args.RemovedReason != CacheEntryRemovedReason.Expired) return;
+            // Now actually handle file event
+            var e = (FileSystemEventArgs)args.CacheItem.Value;
+            ParseSave();
+        }
     }
 }
