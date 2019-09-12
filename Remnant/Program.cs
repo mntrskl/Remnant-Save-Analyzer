@@ -9,25 +9,52 @@ using System.Text;
 
 namespace Remnant
 {
+    #region Extensions & Helpers
+    public static class Extensions
+    {
+        public static void AddIf(this TreeNodeCollection collection, TreeNode node)
+        {
+            if (!collection.ContainsKey(node.Name))
+            {
+                collection.Add(node);
+            }
+        }
+    }
+    #endregion
+
+    #region Event Data
+    public class RemnantEvent
+    {
+        public string zone;
+        public string mainLocation;
+        public string subLocation;
+        public string eventType;
+        public string eventName;
+        public RemnantEvent(string zone, string mainLocation, string subLocation, string eventType, string eventName)
+        {
+            this.zone = zone;
+            this.mainLocation = mainLocation;
+            this.subLocation = subLocation;
+            this.eventType = eventType;
+            this.eventName = eventName;
+        }
+    }
+    #endregion
+
     static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
-        {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            rForm = new Form1();
-            Application.Run(rForm);
-        }
-        public static Form rForm;
-        public static FileSystemWatcher saveWatcher;
-        public static string currentSave = "";
-        public delegate void CampaignReroll(string saveText, List<RemnantEvent> events);
-        public static CampaignReroll OnReroll;
-        static Dictionary<string, string> sublocations = new Dictionary<string, string>
+        #region Mapping
+        static readonly Dictionary<string, string> mainLocations = new Dictionary<string, string>{
+            {"City Overworld Zone1", "Fairview" },
+            {"City Overworld Zone2", "Westcourt" },
+            {"Wasteland Overworld Zone1", "TheEasternWind" },
+            {"Wasteland Overworld Zone2", "TheScouringWaste" },
+            {"Jungle Overworld Zone1", "TheVerdantStrand" },
+            {"Jungle Overworld Zone2", "TheScaldingGlade" },
+            {"Swamp Overworld Zone1", "TheFetidGlade" },
+            {"Swamp Overworld Zone2", "TheMistFen" }
+        };
+        static readonly Dictionary<string, string> sublocations = new Dictionary<string, string>
         {
             {"RootCultist", "MarrowPass" },
             {"RootWraith", "TheHiddenSanctum" },
@@ -67,46 +94,62 @@ namespace Remnant
             {"WolfShrine", "Martyr'sSanctuary" },
             {"UndyingKing", "Pussy'sPyramid" }
         };
-        static Dictionary<string, string> mainLocations = new Dictionary<string, string>{
-            {"City Overworld Zone1", "Fairview" },
-            {"City Overworld Zone2", "Westcourt" },
-            {"Wasteland Overworld Zone1", "TheEasternWind" },
-            {"Wasteland Overworld Zone2", "TheScouringWaste" },
-            {"Jungle Overworld Zone1", "TheVerdantStrand" },
-            {"Jungle Overworld Zone2", "TheScaldingGlade" },
-            {"Swamp Overworld Zone1", "TheFetidGlade" },
-            {"Swamp Overworld Zone2", "TheMistFen" }
-        };
-        public static void WatchForChanges(string savePath)
+        static readonly Dictionary<string, string> eventNames = new Dictionary<string, string>
         {
-            if (saveWatcher != null)
-            {
-                saveWatcher.Dispose();
-            }
+            {"TheRisen", "Reanimators" },
+            {"LizAndLiz", "LizChicagoTypewriter" },
+            {"Fatty", "TheUncleanOne" },
+            {"WastelandGuardian", "Claviger" },
+            {"RootEnt", "EntBoss" },
+            {"Wolf", "TheRavager" },
+            {"RootDragon", "Singe" },
+            {"SwarmMaster", "Scourge" },
+            {"RootWraith", "Shroud" },
+            {"RootTumbleweed", "TheMangler" },
+            {"Kincaller", "Warden" },
+            {"Tyrant", "Thrall" },
+            {"Vyr", "ShadeAndShatter" },
+            {"ImmolatorAndZephyr", "ScaldAndSear" },
+            {"RootBrute", "Gorefist" },
+            {"SlimeHulk", "Canker" },
+            {"BlinkFiend", "Onslaught" },
+            {"Sentinel", "Raze" },
+            {"Penitent", "Letos Amulet" },
+            {"LastWill", "SupplyRunAssaultRifle" },
+            {"SwampGuardian", "Ixillis" }
+        };
+        #endregion
 
-            saveWatcher = new FileSystemWatcher()
-            {
-                Path = Path.GetDirectoryName(savePath),
-                Filter = Path.GetFileName(savePath)
-            };
-            saveWatcher.Changed += OnChangedAsync;
-            saveWatcher.EnableRaisingEvents = true;
+        // Watcher
+        public static FileSystemWatcher saveWatcher;
+        public static string currentSaveFile = "";
+        public static string currentSaveCSV = "";
+        // Delegates
+        public delegate void CampaignReroll(string saveText, List<RemnantEvent> events);
+        public static CampaignReroll OnReroll;
 
-            ParseSave(savePath);
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Form1());
         }
-        private static void ParseSave(string filePath)
+
+        public static void ParseSave()
         {
             try
             {
-                //rForm.Controls[1].InvokeEx(x => x.Text = "Loading...");
-
                 StringBuilder bob = new StringBuilder();
                 List<RemnantEvent> campaignEvents = new List<RemnantEvent>();
 
-                while (!WaitForFile(filePath))
+                while (!WaitForFile(currentSaveFile))
                     Task.Delay(1000);
 
-                string text = File.ReadAllText(filePath);
+                string text = File.ReadAllText(currentSaveFile);
                 text = text
                     .Split(new string[] { "/Game/Campaign_Main/Quest_Campaign_Ward13.Quest_Campaign_Ward13" }, StringSplitOptions.None)[0];
                 text = text
@@ -186,46 +229,21 @@ namespace Remnant
                         currentMainLocation = mainLocations[currentMainLocation];
                     }
 
-
                     // Show Data
                     if (eventName != lastEventName)
                     {
                         if (eventName != "")
-                        {
-                            eventName = eventName
-                                .Replace("TheRisen", "Reanimators")
-                                .Replace("LizAndLiz", "LizChicagoTypewriter")
-                                .Replace("Fatty", "TheUncleanOne")
-                                .Replace("WastelandGuardian", "Claviger")
-                                .Replace("RootEnt", "EntBoss")
-                                .Replace("Wolf", "TheRavager")
-                                .Replace("RootDragon", "Singe")
-                                .Replace("SwarmMaster", "Scourge")
-                                .Replace("RootWraith", "Shroud")
-                                .Replace("RootTumbleweed", "TheMangler")
-                                .Replace("Kincaller", "Warden")
-                                .Replace("Tyrant", "Thrall")
-                                .Replace("Vyr", "ShadeAndShatter")
-                                .Replace("ImmolatorAndZephyr", "ScaldAndSear")
-                                .Replace("RootBrute", "Gorefist")
-                                .Replace("SlimeHulk", "Canker")
-                                .Replace("BlinkFiend", "Onslaught")
-                                .Replace("Sentinel", "Raze")
-                                .Replace("Penitent", "Letos Amulet")
-                                .Replace("LastWill", "SupplyRunAssaultRifle")
-                                .Replace("SwampGuardian", "Ixillis");
-                        }
+                            if (eventNames.ContainsKey(eventName))
+                                eventName = eventNames[eventName];
 
                         if (zone != "" && eventType != "" && eventName != "")
                         {
                             string value;
                             if (zones[zone].TryGetValue(eventType, out value))
-                            //if (zones[zone][eventType] != "")
                             {
                                 if (zones[zone][eventType].IndexOf(eventName) == -1)
                                 {
                                     zones[zone][eventType] += ", " + eventName;
-                                    //Console.WriteLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
                                     bob.AppendLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
                                     campaignEvents.Add(new RemnantEvent(zone, currentMainLocation, currentSublocation, eventType, eventName));
                                 }
@@ -233,39 +251,50 @@ namespace Remnant
                             else
                             {
                                 zones[zone][eventType] = eventName;
-                                //Console.WriteLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
                                 bob.AppendLine($"{zone}, {currentMainLocation}, {currentSublocation}, {eventType}, {eventName}");
                                 campaignEvents.Add(new RemnantEvent(zone, currentMainLocation, currentSublocation, eventType, eventName));
                             }
                         }
                     }
                 }
-                currentSave = bob.ToString();
-                OnReroll?.Invoke(currentSave, campaignEvents);
-                //rForm.Controls[1].InvokeEx(x => x.Text = currentSave);
+                currentSaveCSV = bob.ToString();
+                OnReroll?.Invoke(bob.ToString(), campaignEvents);
             }
             catch (FileNotFoundException ex)
             {
-                //rForm.Controls[1].InvokeEx(x => x.Text = ex.Message);
+
             }
         }
-        public static void SaveCSV(string dirPath)
+
+        public static void StartWatching()
         {
-            File.WriteAllText(dirPath, currentSave);
+            Console.WriteLine("Test");
+            if (saveWatcher != null)
+            {
+                saveWatcher.Changed -= OnSaveChanged;
+                saveWatcher.Dispose();
+                saveWatcher = null;
+            }
+
+            saveWatcher = new FileSystemWatcher()
+            {
+                Path = Path.GetDirectoryName(currentSaveFile),
+                Filter = Path.GetFileName(currentSaveFile)
+            };
+            saveWatcher.Changed += OnSaveChanged;
+            saveWatcher.EnableRaisingEvents = true;
         }
-        private static void OnChangedAsync(object source, FileSystemEventArgs e) =>
-            ParseSave(e.FullPath);
-        //public static void InvokeEx<T>(this T @this, Action<T> action) where T : ISynchronizeInvoke
-        //{
-        //    if (@this.InvokeRequired)
-        //    {
-        //        @this.Invoke(action, new object[] { @this });
-        //    }
-        //    else
-        //    {
-        //        action(@this);
-        //    }
-        //}
+
+        public static void StopWatching()
+        {
+            if (saveWatcher != null)
+            {
+                saveWatcher.Changed -= OnSaveChanged;
+                saveWatcher.Dispose();
+                saveWatcher = null;
+            }
+        }
+
         static bool WaitForFile(string fullPath)
         {
             int numTries = 0;
@@ -287,54 +316,18 @@ namespace Remnant
                 }
                 catch (Exception ex)
                 {
-                    //Log.LogWarning(
-                    //   "WaitForFile {0} failed to get an exclusive lock: {1}",
-                    //    fullPath, ex.ToString());
-
                     if (numTries > 10)
-                    {
-                        //Log.LogWarning(
-                        //    "WaitForFile {0} giving up after 10 tries",
-                        //    fullPath);
                         return false;
-                    }
 
                     // Wait for the lock to be released
                     System.Threading.Thread.Sleep(500);
                 }
             }
-
-            //Log.LogTrace("WaitForFile {0} returning true after {1} tries",
-            //    fullPath, numTries);
             return true;
         }
 
-    }
-    public class RemnantEvent
-    {
-        public string zone;
-        public string mainLocation;
-        public string subLocation;
-        public string eventType;
-        public string eventName;
-        public RemnantEvent(string zone, string mainLocation, string subLocation, string eventType, string eventName)
-        {
-            this.zone = zone;
-            this.mainLocation = mainLocation;
-            this.subLocation = subLocation;
-            this.eventType = eventType;
-            this.eventName = eventName;
-        }
-    }
+        public static void SaveCSV(string dirPath) => File.WriteAllText(dirPath, currentSaveCSV);
 
-    public static class Extensions
-    {
-        public static void AddIf(this TreeNodeCollection collection, TreeNode node)
-        {
-            if (!collection.ContainsKey(node.Name))
-            {
-                collection.Add(node);
-            }
-        }
+        private static void OnSaveChanged(object source, FileSystemEventArgs e) => ParseSave();
     }
 }
