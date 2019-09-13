@@ -155,7 +155,7 @@ namespace Remnant.FileIO
             {
                 return EventType.WorldBoss;
             }
-            else if(typeString.Equals("MiniBoss"))
+            else if(typeString.ToLower().Equals("miniboss"))
             {
                 return EventType.MiniBoss;
             }
