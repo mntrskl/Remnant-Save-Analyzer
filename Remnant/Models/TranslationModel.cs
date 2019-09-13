@@ -26,7 +26,7 @@ namespace Remnant.Models
             locationNameTranslation = new Dictionary<string, string>{
                 {"RootCultist", "Marrow Pass" },
                 {"RootWraith", "The Hidden Sanctum" },
-                {"Root Brute", "Sunken Passage" },
+                {"RootBrute", "Sunken Passage" },
                 {"Brabus", "Cutthroat Channel" },
                 {"RootTumbleweed", "The Tangled Pass" },
                 {"RootEnt", "The Choking Hollow" },
