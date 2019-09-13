@@ -47,13 +47,13 @@ namespace Remnant
             dt.Columns.Add("Zone", typeof(string));
             dt.Columns.Add("Sub-Zone", typeof(string));
             dt.Columns.Add("Location", typeof(string));
-            dt.Columns.Add("Type", typeof(EventType));
+            dt.Columns.Add("Type", typeof(string));
             dt.Columns.Add("Name", typeof(string));
             dt.Columns.Add("Complete", typeof(bool));
 
             foreach (var item in eventList)
             {
-                dt.Rows.Add(item.zone, item.subZone, item.location, item.eventType, item.name, item.complete);
+                dt.Rows.Add(item.zone, item.subZone, item.location, item.eventType.ToReadableString(), item.name, item.complete);
             }
 
             GVCampaign.DataSource = dt;

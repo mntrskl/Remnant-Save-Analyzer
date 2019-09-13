@@ -13,7 +13,8 @@ namespace Remnant.Models
         WorldBoss,
         Siege,
         MiniBoss,
-        ItemDrop
+        ItemDrop,
+        PointOfInterest
     }
 
     public static class EventTypeExtensions
@@ -32,6 +33,8 @@ namespace Remnant.Models
                     return "Mini-Boss";
                 case EventType.ItemDrop:
                     return "Item Drop";
+                case EventType.PointOfInterest:
+                    return "Point Of Interest";
                 default:
                     return "??";
             }

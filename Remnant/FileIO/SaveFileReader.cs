@@ -130,7 +130,12 @@ namespace Remnant.FileIO
             @event.zone = EventTranslationModel.TranslateEventZone(lineList[0]);
             @event.subZone = _subZone;
             @event.eventType = ReadEventType(lineList[2]);
-            @event.location = @event.eventType == EventType.ItemDrop ? _location : ReadEventLocation(lineList[2]);
+
+            @event.location = @event.eventType == EventType.ItemDrop 
+                ? _location 
+                : @event.eventType == EventType.PointOfInterest
+                    ? "Overworld"
+                    : ReadEventLocation(lineList[2]);
             @event.name = ReadEventName(lineList[2]);
             if (namesEncountered.Contains(@event.name))
             {
@@ -165,6 +170,10 @@ namespace Remnant.FileIO
             else if (typeString.Equals("Siege"))
             {
                 return EventType.Siege;
+            }
+            else if(typeString.Equals("OverworldPOI"))
+            {
+                return EventType.PointOfInterest;
             }
             else
             {
