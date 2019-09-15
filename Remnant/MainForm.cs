@@ -31,6 +31,7 @@ namespace Remnant
                 textBox1.Text = browseDialog.FileName;
             }
         }
+
         private void ExportCSVToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (GVCampaign.DataSource == null) return;
@@ -40,56 +41,41 @@ namespace Remnant
                 DefaultExt = ".csv",
                 InitialDirectory = Directory.GetCurrentDirectory()
             };
+
             DialogResult result = dialog.ShowDialog();
             if (result == DialogResult.OK)
             {
                 _viewModel.ExportCSV(dialog.FileName, GVCampaign.DataSource as DataTable);
             }
         }
+
         private void AutoRefreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
             autoRefreshToolStripMenuItem.Checked = _viewModel.SetWatcher(!autoRefreshToolStripMenuItem.Checked);
         }
 
-        public void UpdateCampaignGrid(List<EventModel> eventList)
+        public void UpdateCampaignGrid(DataTable table)
         {
-            this.Invoke(new Action(() => { FillCampaignGrid(eventList); }));
+            this.Invoke(new Action(() => { FillCampaignGrid(table); }));
         }
 
-        public void UpdateAdventureGrid(List<EventModel> eventList)
+        public void UpdateAdventureGrid(DataTable table)
         {
-            this.Invoke(new Action(() => { FillAdventureGrid(eventList); }));
+            this.Invoke(new Action(() => { FillAdventureGrid(table); }));
         }
 
-        public void FillCampaignGrid(List<EventModel> eventList)
+        public void FillCampaignGrid(DataTable table)
         {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Zone", typeof(string));
-            dt.Columns.Add("Sub-Zone", typeof(string));
-            dt.Columns.Add("Location", typeof(string));
-            dt.Columns.Add("Type", typeof(string));
-            dt.Columns.Add("Name", typeof(string));
-            dt.Columns.Add("Complete", typeof(bool));
-
-            foreach (var item in eventList)
-            {
-                dt.Rows.Add(item.zone, item.subZone, item.location, item.eventType.ToReadableString(), item.name, item.complete);
-            }
-
-            GVCampaign.DataSource = dt;
+            GVCampaign.DataSource = table;
             GVCampaign.AutoResizeColumns();
+            CBFilterGroup.DisplayMember = string.Empty; 
         }
 
-        public void FillAdventureGrid(List<EventModel> eventList)
+        public void FillAdventureGrid(DataTable table)
         {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Zone", typeof(string));
-            dt.Columns.Add("Location", typeof(string));
-            dt.Columns.Add("Type", typeof(EventType));
-            dt.Columns.Add("Name", typeof(string));
-            dt.Columns.Add("Complete", typeof(bool));
-
-            foreach (var item in eventList)
+            GVAdventure.DataSource = table;
+            GVAdventure.AutoResizeColumns();
+        }
             {
                 dt.Rows.Add(item.zone, item.location, item.eventType, item.name, item.complete);
             }

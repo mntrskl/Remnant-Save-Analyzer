@@ -12,7 +12,6 @@ namespace Remnant.Models
     public class MainFormViewModel
     {
         private FileSystemWatcher saveWatcher;
-        private string _oldPath;
         private string _currentPath;
         private MemoryCache _memCache;
         private CacheItemPolicy _cacheItemPolicy;
@@ -22,7 +21,6 @@ namespace Remnant.Models
         public MainFormViewModel()
         {
             form = new MainForm(this);
-            _oldPath = string.Empty;
             _currentPath = string.Empty;
         }
 
@@ -44,6 +42,7 @@ namespace Remnant.Models
             saveWatcher.Changed += OnFileChanged;
             saveWatcher.EnableRaisingEvents = true;
         }
+
         private void KillWatcher()
         {
             if (saveWatcher != null)
@@ -56,14 +55,45 @@ namespace Remnant.Models
 
         public void FileUpdate(string filePath)
         {
-            //if (!_oldPath.Equals(filePath))
-            //{
-            //    InitializeWatcher(filePath);
-            //}
             _currentPath = filePath;
             SaveFileReader reader = new SaveFileReader(filePath);
-            form.UpdateCampaignGrid(reader.ParseCampaign());
-            form.UpdateAdventureGrid(reader.ParseAdventure());
+            form.UpdateCampaignGrid(CreateCampaignTable(reader.ParseCampaign()));
+            form.UpdateAdventureGrid(CreateAdventureTable(reader.ParseAdventure()));
+        }
+
+        private DataTable CreateCampaignTable(List<EventModel> eventList)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Zone", typeof(string));
+            dt.Columns.Add("Sub-Zone", typeof(string));
+            dt.Columns.Add("Location", typeof(string));
+            dt.Columns.Add("Type", typeof(string));
+            dt.Columns.Add("Name", typeof(string));
+            dt.Columns.Add("Complete", typeof(bool));
+
+            foreach (var item in eventList)
+            {
+                dt.Rows.Add(item.zone, item.subZone, item.location, item.eventType.ToReadableString(), item.name, item.complete);
+            }
+
+            return dt;
+        }
+
+        private DataTable CreateAdventureTable(List<EventModel> eventList)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Zone", typeof(string));
+            dt.Columns.Add("Location", typeof(string));
+            dt.Columns.Add("Type", typeof(EventType));
+            dt.Columns.Add("Name", typeof(string));
+            dt.Columns.Add("Complete", typeof(bool));
+
+            foreach (var item in eventList)
+            {
+                dt.Rows.Add(item.zone, item.location, item.eventType, item.name, item.complete);
+            }
+
+            return dt;
         }
 
         public bool SetWatcher (bool enabled)
