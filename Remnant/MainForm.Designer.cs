@@ -77,6 +77,7 @@
             this.GVAdventure.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.GVAdventure.Location = new System.Drawing.Point(12, 385);
             this.GVAdventure.Name = "GVAdventure";
+            this.GVAdventure.ReadOnly = true;
             this.GVAdventure.RowHeadersVisible = false;
             this.GVAdventure.Size = new System.Drawing.Size(713, 300);
             this.GVAdventure.TabIndex = 4;
@@ -100,6 +101,7 @@
             this.GVCampaign.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.GVCampaign.Location = new System.Drawing.Point(12, 66);
             this.GVCampaign.Name = "GVCampaign";
+            this.GVCampaign.ReadOnly = true;
             this.GVCampaign.RowHeadersVisible = false;
             this.GVCampaign.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.GVCampaign.Size = new System.Drawing.Size(713, 300);
@@ -179,6 +181,7 @@
             this.CBFilterGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.CBFilterGroup.FormattingEnabled = true;
             this.CBFilterGroup.Items.AddRange(new object[] {
+            " ",
             "Zone",
             "Sub-Zone",
             "Location",

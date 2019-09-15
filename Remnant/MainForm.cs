@@ -68,7 +68,16 @@ namespace Remnant
         {
             GVCampaign.DataSource = table;
             GVCampaign.AutoResizeColumns();
-            CBFilterGroup.DisplayMember = string.Empty; 
+            ResetFilterComboBoxes();
+        }
+
+        public void ResetFilterComboBoxes()
+        {
+            CBFilterGroup.Text = " ";
+            CBFilterValue.TextChanged -= CBFilterValue_TextChanged;
+            CBFilterValue.Text = string.Empty;
+            CBFilterValue.DataSource = null;
+            CBFilterValue.TextChanged += CBFilterValue_TextChanged;
         }
 
         public void FillAdventureGrid(DataTable table)
@@ -79,7 +88,13 @@ namespace Remnant
 
         private void CBFilterGroup_TextChanged(object sender, EventArgs e)
         {
-            if (CBFilterGroup.Text.Equals(string.Empty) || GVCampaign.DataSource == null) return;
+            if (CBFilterGroup.Text.Equals(string.Empty) 
+                || CBFilterGroup.Text.Equals(" "))
+            {
+                CBFilterValue.Text = string.Empty;
+                return;
+            }
+
             CBFilterValue.TextChanged -= CBFilterValue_TextChanged;
             CBFilterValue.DataSource = GetFilterValues();
             CBFilterValue.TextChanged += CBFilterValue_TextChanged;
@@ -89,6 +104,8 @@ namespace Remnant
         {
             List<string> stringList = new List<string>();
             stringList.Add(string.Empty);
+            if (GVCampaign.DataSource == null)
+                return stringList;
 
             foreach (DataRow row in (GVCampaign.DataSource as DataTable).Rows)
             {
@@ -107,6 +124,7 @@ namespace Remnant
 
         private void ApplyFilter()
         {
+            if (GVCampaign.DataSource == null) return;
             if (CBFilterValue.Text.Equals(string.Empty)) (GVCampaign.DataSource as DataTable).DefaultView.RowFilter = string.Empty;
             else (GVCampaign.DataSource as DataTable).DefaultView.RowFilter = string.Format("[{0}] = '{1}'", CBFilterGroup.Text, CBFilterValue.Text);
         }
