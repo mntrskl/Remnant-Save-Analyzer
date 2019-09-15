@@ -76,12 +76,39 @@ namespace Remnant
             GVAdventure.DataSource = table;
             GVAdventure.AutoResizeColumns();
         }
+
+        private void CBFilterGroup_TextChanged(object sender, EventArgs e)
+        {
+            if (CBFilterGroup.Text.Equals(string.Empty) || GVCampaign.DataSource == null) return;
+            CBFilterValue.TextChanged -= CBFilterValue_TextChanged;
+            CBFilterValue.DataSource = GetFilterValues();
+            CBFilterValue.TextChanged += CBFilterValue_TextChanged;
+        }
+
+        private List<string> GetFilterValues()
+        {
+            List<string> stringList = new List<string>();
+            stringList.Add(string.Empty);
+
+            foreach (DataRow row in (GVCampaign.DataSource as DataTable).Rows)
             {
-                dt.Rows.Add(item.zone, item.location, item.eventType, item.name, item.complete);
+                string value = row[CBFilterGroup.Text].ToString();
+                if (!stringList.Contains(value))
+                    stringList.Add(value);
             }
 
-            GVAdventure.DataSource = dt;
-            GVAdventure.AutoResizeColumns();
+            return stringList;
+        }
+
+        private void CBFilterValue_TextChanged(object sender, EventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        private void ApplyFilter()
+        {
+            if (CBFilterValue.Text.Equals(string.Empty)) (GVCampaign.DataSource as DataTable).DefaultView.RowFilter = string.Empty;
+            else (GVCampaign.DataSource as DataTable).DefaultView.RowFilter = string.Format("[{0}] = '{1}'", CBFilterGroup.Text, CBFilterValue.Text);
         }
     }
 }

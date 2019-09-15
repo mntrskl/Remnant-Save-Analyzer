@@ -40,6 +40,10 @@
             this.exportCSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.autoRefreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.CBFilterGroup = new System.Windows.Forms.ComboBox();
+            this.CBFilterValue = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.GVAdventure)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GVCampaign)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -52,7 +56,7 @@
             this.textBox1.Location = new System.Drawing.Point(12, 27);
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(590, 20);
+            this.textBox1.Size = new System.Drawing.Size(903, 20);
             this.textBox1.TabIndex = 0;
             // 
             // label1
@@ -74,7 +78,7 @@
             this.GVAdventure.Location = new System.Drawing.Point(12, 385);
             this.GVAdventure.Name = "GVAdventure";
             this.GVAdventure.RowHeadersVisible = false;
-            this.GVAdventure.Size = new System.Drawing.Size(590, 300);
+            this.GVAdventure.Size = new System.Drawing.Size(713, 300);
             this.GVAdventure.TabIndex = 4;
             // 
             // label2
@@ -89,6 +93,7 @@
             // GVCampaign
             // 
             this.GVCampaign.AllowUserToAddRows = false;
+            this.GVCampaign.AllowUserToDeleteRows = false;
             this.GVCampaign.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -96,7 +101,8 @@
             this.GVCampaign.Location = new System.Drawing.Point(12, 66);
             this.GVCampaign.Name = "GVCampaign";
             this.GVCampaign.RowHeadersVisible = false;
-            this.GVCampaign.Size = new System.Drawing.Size(590, 300);
+            this.GVCampaign.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+            this.GVCampaign.Size = new System.Drawing.Size(713, 300);
             this.GVCampaign.TabIndex = 6;
             // 
             // menuStrip1
@@ -105,7 +111,7 @@
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(614, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(927, 24);
             this.menuStrip1.TabIndex = 7;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -146,11 +152,63 @@
             this.autoRefreshToolStripMenuItem.Text = "Auto Refresh";
             this.autoRefreshToolStripMenuItem.Click += new System.EventHandler(this.AutoRefreshToolStripMenuItem_Click);
             // 
+            // label4
+            // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label4.Location = new System.Drawing.Point(731, 66);
+            this.label4.Margin = new System.Windows.Forms.Padding(3);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(80, 13);
+            this.label4.TabIndex = 9;
+            this.label4.Text = "Filter By:";
+            // 
+            // label5
+            // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label5.Location = new System.Drawing.Point(731, 90);
+            this.label5.Margin = new System.Windows.Forms.Padding(3);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(80, 13);
+            this.label5.TabIndex = 10;
+            this.label5.Text = "Filter Value:";
+            // 
+            // CBFilterGroup
+            // 
+            this.CBFilterGroup.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.CBFilterGroup.BackColor = System.Drawing.SystemColors.Window;
+            this.CBFilterGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.CBFilterGroup.FormattingEnabled = true;
+            this.CBFilterGroup.Items.AddRange(new object[] {
+            "Zone",
+            "Sub-Zone",
+            "Location",
+            "Type"});
+            this.CBFilterGroup.Location = new System.Drawing.Point(797, 63);
+            this.CBFilterGroup.Name = "CBFilterGroup";
+            this.CBFilterGroup.Size = new System.Drawing.Size(121, 21);
+            this.CBFilterGroup.TabIndex = 11;
+            this.CBFilterGroup.TextChanged += new System.EventHandler(this.CBFilterGroup_TextChanged);
+            // 
+            // CBFilterValue
+            // 
+            this.CBFilterValue.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.CBFilterValue.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.CBFilterValue.FormattingEnabled = true;
+            this.CBFilterValue.Location = new System.Drawing.Point(797, 87);
+            this.CBFilterValue.Name = "CBFilterValue";
+            this.CBFilterValue.Size = new System.Drawing.Size(121, 21);
+            this.CBFilterValue.TabIndex = 12;
+            this.CBFilterValue.TextChanged += new System.EventHandler(this.CBFilterValue_TextChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(614, 691);
+            this.ClientSize = new System.Drawing.Size(927, 691);
+            this.Controls.Add(this.CBFilterValue);
+            this.Controls.Add(this.CBFilterGroup);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.GVCampaign);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.GVAdventure);
@@ -159,8 +217,8 @@
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.MaximumSize = new System.Drawing.Size(630, 730);
-            this.MinimumSize = new System.Drawing.Size(630, 730);
+            this.MaximumSize = new System.Drawing.Size(1300, 730);
+            this.MinimumSize = new System.Drawing.Size(600, 730);
             this.Name = "MainForm";
             this.Text = "Remnant Save Parser";
             ((System.ComponentModel.ISupportInitialize)(this.GVAdventure)).EndInit();
@@ -185,6 +243,10 @@
         private System.Windows.Forms.ToolStripMenuItem exportCSVToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem autoRefreshToolStripMenuItem;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ComboBox CBFilterGroup;
+        private System.Windows.Forms.ComboBox CBFilterValue;
     }
 }
 
