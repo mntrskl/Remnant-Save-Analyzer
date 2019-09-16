@@ -31,6 +31,7 @@ namespace Remnant
                 textBox1.Text = browseDialog.FileName;
             }
         }
+
         private void ExportCSVToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (GVCampaign.DataSource == null) return;
@@ -40,62 +41,92 @@ namespace Remnant
                 DefaultExt = ".csv",
                 InitialDirectory = Directory.GetCurrentDirectory()
             };
+
             DialogResult result = dialog.ShowDialog();
             if (result == DialogResult.OK)
             {
                 _viewModel.ExportCSV(dialog.FileName, GVCampaign.DataSource as DataTable);
             }
         }
+
         private void AutoRefreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
             autoRefreshToolStripMenuItem.Checked = _viewModel.SetWatcher(!autoRefreshToolStripMenuItem.Checked);
         }
 
-        public void UpdateCampaignGrid(List<EventModel> eventList)
+        public void UpdateCampaignGrid(DataTable table)
         {
-            this.Invoke(new Action(() => { FillCampaignGrid(eventList); }));
+            this.Invoke(new Action(() => { FillCampaignGrid(table); }));
         }
 
-        public void UpdateAdventureGrid(List<EventModel> eventList)
+        public void UpdateAdventureGrid(DataTable table)
         {
-            this.Invoke(new Action(() => { FillAdventureGrid(eventList); }));
+            this.Invoke(new Action(() => { FillAdventureGrid(table); }));
         }
 
-        public void FillCampaignGrid(List<EventModel> eventList)
+        public void FillCampaignGrid(DataTable table)
         {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Zone", typeof(string));
-            dt.Columns.Add("Sub-Zone", typeof(string));
-            dt.Columns.Add("Location", typeof(string));
-            dt.Columns.Add("Type", typeof(string));
-            dt.Columns.Add("Name", typeof(string));
-            dt.Columns.Add("Complete", typeof(bool));
-
-            foreach (var item in eventList)
-            {
-                dt.Rows.Add(item.zone, item.subZone, item.location, item.eventType.ToReadableString(), item.name, item.complete);
-            }
-
-            GVCampaign.DataSource = dt;
+            GVCampaign.DataSource = table;
             GVCampaign.AutoResizeColumns();
+            ResetFilterComboBoxes();
         }
 
-        public void FillAdventureGrid(List<EventModel> eventList)
+        public void ResetFilterComboBoxes()
         {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Zone", typeof(string));
-            dt.Columns.Add("Location", typeof(string));
-            dt.Columns.Add("Type", typeof(EventType));
-            dt.Columns.Add("Name", typeof(string));
-            dt.Columns.Add("Complete", typeof(bool));
+            CBFilterGroup.Text = " ";
+            CBFilterValue.TextChanged -= CBFilterValue_TextChanged;
+            CBFilterValue.Text = string.Empty;
+            CBFilterValue.DataSource = null;
+            CBFilterValue.TextChanged += CBFilterValue_TextChanged;
+        }
 
-            foreach (var item in eventList)
+        public void FillAdventureGrid(DataTable table)
+        {
+            GVAdventure.DataSource = table;
+            GVAdventure.AutoResizeColumns();
+        }
+
+        private void CBFilterGroup_TextChanged(object sender, EventArgs e)
+        {
+            if (CBFilterGroup.Text.Equals(string.Empty) 
+                || CBFilterGroup.Text.Equals(" "))
             {
-                dt.Rows.Add(item.zone, item.location, item.eventType, item.name, item.complete);
+                CBFilterValue.Text = string.Empty;
+                return;
             }
 
-            GVAdventure.DataSource = dt;
-            GVAdventure.AutoResizeColumns();
+            CBFilterValue.TextChanged -= CBFilterValue_TextChanged;
+            CBFilterValue.DataSource = GetFilterValues();
+            CBFilterValue.TextChanged += CBFilterValue_TextChanged;
+        }
+
+        private List<string> GetFilterValues()
+        {
+            List<string> stringList = new List<string>();
+            stringList.Add(string.Empty);
+            if (GVCampaign.DataSource == null)
+                return stringList;
+
+            foreach (DataRow row in (GVCampaign.DataSource as DataTable).Rows)
+            {
+                string value = row[CBFilterGroup.Text].ToString();
+                if (!stringList.Contains(value))
+                    stringList.Add(value);
+            }
+
+            return stringList;
+        }
+
+        private void CBFilterValue_TextChanged(object sender, EventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        private void ApplyFilter()
+        {
+            if (GVCampaign.DataSource == null) return;
+            if (CBFilterValue.Text.Equals(string.Empty)) (GVCampaign.DataSource as DataTable).DefaultView.RowFilter = string.Empty;
+            else (GVCampaign.DataSource as DataTable).DefaultView.RowFilter = string.Format("[{0}] = '{1}'", CBFilterGroup.Text, CBFilterValue.Text);
         }
     }
 }
